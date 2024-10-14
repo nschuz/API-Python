@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=app_admin
+      - DATABASE_PASSWORD=app_admin
+      - DATABASE_NAME=api-libros
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./src:/app 
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: app_admin
+      POSTGRES_PASSWORD: app_admin
+      POSTGRES_DB: libros
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployment/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
